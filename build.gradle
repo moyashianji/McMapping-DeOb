@@ -4,18 +4,37 @@ plugins {
 
 group = 'org.example'
 version = '1.0-SNAPSHOT'
-
+jar{
+    manifest{
+        attributes 'Main-Class' : 'org.example.Main'//クラス名を指定する
+    }
+}
 repositories {
     mavenCentral()
 }
-
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.apache.commons:commons-csv:1.9.0' // もしくは最新のバージョン
+    implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
 
 }
-
+// Uber JAR用のタスクを定義
+task uberJar(type: Jar) {
+    from sourceSets.main.output
+    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest {
+        attributes 'Main-Class': 'org.example.Main'
+    }
+    archiveFileName = '難読化解除くん.jar'
+}
 test {
     useJUnitPlatform()
+}
+build {
+    dependsOn 'uberJar'
 }
